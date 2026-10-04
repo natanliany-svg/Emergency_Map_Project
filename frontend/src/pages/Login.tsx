@@ -18,12 +18,13 @@ export default function Login() {
             <form onSubmit={async (e) => {
                 e.preventDefault()
                 try {
-                    const res = await axios.post('http://localhost:3200/api/users/login', { email, password })
+                    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3200'
+                    const res = await axios.post(`${API_URL}/api/users/login`, { email, password })
                     
                     if (res.data.success) {
                         const token = res.data.data.token
                         
-                        const meRes = await axios.get('http://localhost:3200/api/users/me', {
+                        const meRes = await axios.get(`${API_URL}/api/users/me`, {
                             headers: { Authorization: `Bearer ${token}` }
                         })
                         
@@ -61,3 +62,6 @@ export default function Login() {
         </div>
     )
 }
+
+
+

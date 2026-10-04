@@ -24,7 +24,13 @@ export async function registerUser(req, res) {
         }
 
         const result = await insertUser(userToSave)
-        res.status(201).json({ success: true, data: result })
+                const token = jwt.sign(
+            { id: result.insertedId, role: userToSave.role },
+            process.env.JWT_SECRET || 'defaltSecrt123',
+            { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+        )
+
+        res.status(201).json({ success: true, data: { user: result, token } })
     } catch (error) {
         console.log("register err", error)
         res.status(400).json({ success: false, message: "Invalid data provided" })
@@ -49,7 +55,7 @@ export async function loginUser(req, res) {
         const token = jwt.sign(
             { id: user._id, role: user.role },
             process.env.JWT_SECRET || 'defaltSecrt123',
-            { expiresIn: '24h' }
+            { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
         )
 
         res.status(200).json({ success: true, data: { token } })

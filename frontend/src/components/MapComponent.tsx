@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet'
 import axios from 'axios'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -33,6 +33,16 @@ function MapClick({ onClick }: { onClick: (latlng: { lat: number, lng: number })
     return null
 }
 
+function LocationMarker() {
+    const map = useMap()
+    useEffect(() => {
+        map.locate().on("locationfound", function (e) {
+            map.flyTo(e.latlng, map.getZoom())
+        })
+    }, [map])
+    return null
+}
+
 export default function MapComponent() {
     const [incidents, setIncidents] = useState<Incident[]>([])
     const [draftLocation, setDraftLocation] = useState<{lat: number, lng: number} | null>(null)
@@ -40,11 +50,12 @@ export default function MapComponent() {
     
     const token = useAuthStore(state => state.token)
     const user = useAuthStore(state => state.user)
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3200'
 
     useEffect(() => {
         const fetchIncidents = async () => {
             try {
-                const res = await axios.get('http://localhost:3200/api/incidents', {
+                const res = await axios.get(`${API_URL}/api/incidents`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 if (res.data.success) {
@@ -55,11 +66,11 @@ export default function MapComponent() {
             }
         }
         fetchIncidents()
-    }, [token])
+    }, [token, API_URL])
 
     const fetchIncidentsManual = async () => {
         try {
-            const res = await axios.get('http://localhost:3200/api/incidents', {
+            const res = await axios.get(`${API_URL}/api/incidents`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             if (res.data.success) {
@@ -77,7 +88,7 @@ export default function MapComponent() {
 
     const handleDelete = async (id: string) => {
         try {
-            await axios.delete(`http://localhost:3200/api/incidents/${id}`, {
+            await axios.delete(`${API_URL}/api/incidents/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             fetchIncidentsManual()
@@ -88,7 +99,7 @@ export default function MapComponent() {
 
     const handleStatusUpdate = async (id: string, newStatus: string) => {
         try {
-            await axios.patch(`http://localhost:3200/api/incidents/${id}`, { status: newStatus }, {
+            await axios.patch(`${API_URL}/api/incidents/${id}`, { status: newStatus }, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             fetchIncidentsManual()
@@ -120,6 +131,7 @@ export default function MapComponent() {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 
+                <LocationMarker />
                 <MapClick onClick={setDraftLocation} />
 
                 {draftLocation && (

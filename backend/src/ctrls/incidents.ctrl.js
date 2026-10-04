@@ -4,19 +4,13 @@ import { insertIncident, fetchIncidents, getIncidentById, updateIncident, delete
 export async function createIncident(req, res) {
     try {
         const validData = incidentSchema.parse(req.body)
+        validData.createdBy = req.user.id
         
-        const incdentToSave = {
-            ...validData,
-            createdBy: req.user ? req.user.id : "temp-user-id",
-            createdAt: new Date(),
-            updatedAt: new Date()
-        }
-
-        const result = await insertIncident(incdentToSave)
-        res.status(201).json({ success: true, data: result })
+        await insertIncident(validData)
+        res.status(201).json({ success: true, message: "Incident created" })
     } catch (error) {
-        console.log("create incdent err", error)
-        res.status(400).json({ success: false, message: "Invalid data provided" })
+        console.log(error)
+        res.status(500).json({ success: false, message: "Server error" })
     }   
 }
 
@@ -24,6 +18,22 @@ export async function getIncidents(req, res) {
     try {
         const result = await fetchIncidents()
         res.status(200).json({ success: true, data: result })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ success: false, message: "Server error" })
+    }
+}
+
+export async function getIncidentReq(req, res) {
+    try {
+        const { id } = req.params
+        const incident = await getIncidentById(id)
+        
+        if (!incident) {
+            return res.status(404).json({ success: false, message: "Not found" })
+        }
+        
+        res.status(200).json({ success: true, data: incident })
     } catch (error) {
         console.log(error)
         res.status(500).json({ success: false, message: "Server error" })
@@ -51,7 +61,7 @@ export async function updateIncidentReq(req, res) {
 
     } catch (error) {
         console.log("updte err", error)
-        res.status(400).json({ success: false, message: "Invalid data" })
+        res.status(500).json({ success: false, message: "Server error" })
     }
 }
 
