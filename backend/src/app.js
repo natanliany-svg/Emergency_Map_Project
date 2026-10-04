@@ -2,10 +2,9 @@ import express from 'express'
 import "dotenv/config";
 import cors from "cors";
 
-import { connectDB } from './DAL/db.js'
-import router  from './routes/incidentRoutes.js';
-
-
+import { connectDB } from './db/db.js'
+import incidentRoutes from './routes/incidents.routes.js';
+import userRoutes from './routes/auth.routes.js';
 
 const app = express();
 const port = process.env.PORT || 3200;
@@ -13,9 +12,8 @@ const port = process.env.PORT || 3200;
 app.use(cors({}));
 app.use(express.json());
 
-
-app.use('/api/incidents', router)
-
+app.use('/api/incidents', incidentRoutes);
+app.use('/api/users', userRoutes)
 
 connectDB()
 

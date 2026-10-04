@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createIncident, getIncidents } from "../controllers/incidentController.js";
+import { createIncident, getIncidents } from "../ctrls/incidents.ctrl.js";
 
 
 const router = Router()

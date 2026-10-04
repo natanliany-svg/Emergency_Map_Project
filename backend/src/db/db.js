@@ -1,11 +1,8 @@
 import {MongoClient} from 'mongodb'
 import 'dotenv/config'
 
-
 const uri = process.env.MONGO_URI 
 const client = new MongoClient(uri);
-
-
 
 let dbConnection;
 
@@ -26,6 +23,3 @@ export const getDB = () => {
     }
     return dbConnection
 }
-
-
-
